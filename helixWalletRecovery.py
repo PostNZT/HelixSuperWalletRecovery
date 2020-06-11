@@ -1,0 +1,55 @@
+def read_string(buffer, offset):
+    offset, string_len = read_size(buffer, offset)
+    return offset + string_len, buffer[offset: offset + string_len]
+
+def b58_encode(d):
+    out = ""
+    p = 0
+    x = 0
+
+    while ord(d[0]) == 0:
+        out += "1"
+        d = d[1:]
+
+    for i, v in enumerate(d[::-1]):
+        x += ord(v)*(256**i)
+
+    while x > 58**(p+1):
+        p += 1
+
+    while p >= 0:
+        a, x = divmod(x, 58**p)
+        out += B58[a]
+        p -= 1
+
+    return out
+
+def b58check_encode(d):
+    checksum = sha256(sha256(d).digest()).digest()[:4]
+    return b58_encode(d + checksum)
+
+
+db = DB()
+db.open(sys.argv[1], "main", DB_BTREE, DB_RDONLY)
+
+items = db.items()
+
+for item in items:
+    k, v = item
+    koff, voff = 0, 0
+    koff, item_type = read_string(k, koff)
+
+    if item_type == "key":
+        koff, pubkey = read_string(k, koff)
+        voff, privkey = read_string(v, voff)
+
+        if len(privkey) == 279:
+            secret = privkey[9:9+32]
+        else:
+            secret = privkey[8:8+32]
+
+        if pubkey[0] != "\x04":
+            secret += "\x01"
+
+        print(b58check_encode("\xD4" + secret))
+db.close()
