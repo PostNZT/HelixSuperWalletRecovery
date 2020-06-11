@@ -4,3 +4,7 @@ Debian-based Linux:
  pip install of the bsddb may be required.
  
 python helixWalletRecovery.py wallet.dat
+
+# AFTER GETTING THE PRIVATE KEY RUN THIS CODE:
+helix-cli -rpcuser="YOURMACHINEUSERNAME" -rpcpassword="YOURMACHINEPASSWORD importprivkey "PRIVATE KEYS" 
+
