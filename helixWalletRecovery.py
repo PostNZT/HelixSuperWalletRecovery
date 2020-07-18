@@ -1,3 +1,18 @@
+import sys
+import struct
+from bsddb.db import *
+from hashlib import sha256
+
+# Dumps the private keys from a wallet.dat file.
+# Inspired by pywallet.
+# Credits: https://bitcoin.stackexchange.com/questions/13681/opening-wallet-dat-in-python-using-bsddb3
+
+B58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+
+if not len(sys.argv) == 2:
+    print("Usage: %s <wallet_file>" % sys.argv[2])
+    sys.exit(1)
+
 def read_string(buffer, offset):
     offset, string_len = read_size(buffer, offset)
     return offset + string_len, buffer[offset: offset + string_len]
